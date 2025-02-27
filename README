@@ -1,0 +1,14 @@
+Python SETUP:
+run: python -m venv venv
+run: pip install -r requirements.txt
+
+Node SETUP:
+run: pnpm install
+
+Convert Resources:
+run: node convertExcel "resources/wda hpo lists.xlsx" "NW" vertical
+run: node convertExcel "resources/pa_cip_soc.xls" horizontal
+run: python convertPDF.py
+
+Get Data by SOC Code:
+run: node scipt.js
