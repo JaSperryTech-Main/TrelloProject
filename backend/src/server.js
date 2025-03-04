@@ -4,14 +4,17 @@ import cors from 'cors';
 
 import routes from './routes/index.js';
 
+const coreConfig = {
+  origin: '*',
+};
+
 dotenv.config();
 
 const app = express();
 
-const corsConfig = {};
+app.use(cors(coreConfig));
 
 app.use(express.json());
-app.use(cors(corsConfig));
 
 app.use('/api', routes);
 

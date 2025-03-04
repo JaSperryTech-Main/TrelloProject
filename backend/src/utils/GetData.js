@@ -99,13 +99,19 @@ function displayResults(socCode, results) {
   }
 }
 
-// Main function to perform the search and display the results
-async function searchAndDisplaySOCCode(socCode) {
-  const results = await searchSOCCode(socCode);
-  // displayResults(socCode, results);
-  return results;
+async function getAllCIPCodes() {
+  const CIPData = await loadJSON('./output/pa_cip_soc.json');
+
+  if (!CIPData || !CIPData['CIPxSOC 2015']) {
+    console.error('Invalid data structure');
+    return;
+  }
+
+  const allCIPCodes = [
+    ...new Set(CIPData['CIPxSOC 2015'].map((item) => item['CIP Code'])),
+  ];
 }
 
 // Example usage: search for a specific SOC code (e.g., "25-2022" works on all jsons)
 // searchAndDisplaySOCCode('25-2022'); // Change this to the SOC Code you want to search
-export default searchAndDisplaySOCCode;
+export { searchSOCCode, getAllCIPCodes };

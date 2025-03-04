@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import convertExcel from '../script/convertExcel.js';
+import convertExcel from '../utils/convertExcel.js';
 import { spawn } from 'child_process';
 
 const router = Router();
@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
   try {
     await convertExcel(links[0], 'NW', 'vertical');
     await convertExcel(links[1], 'CIPxSOC 2015', 'horizontal');
-    const convertPDF = spawn('python', ['../backend/script/convertPDF.py']);
+    const convertPDF = spawn('python', ['./src/script/convertPDF.py']);
 
     convertPDF.stderr.on('data', (data) => {
       console.error(`Error: ${data}`);
