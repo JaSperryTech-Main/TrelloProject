@@ -26,7 +26,7 @@ async function searchSOCCode(socCode) {
   const wdaHpoData = await loadJSON('./output/wda_hpo_lists.json');
 
   if (!CIPData || !paIdolData || !wdaHpoData) {
-    console.log('Failed to load one or more files.');
+    console.warn('Failed to load one or more files.');
     return;
   }
 
@@ -79,7 +79,7 @@ async function searchCIPCode(cipCode) {
   const wdaHpoData = await loadJSON('./output/wda_hpo_lists.json');
 
   if (!CIPData || !paIdolData || !wdaHpoData) {
-    console.log('Failed to load one or more files.');
+    console.warn('Failed to load one or more files.');
     return;
   }
 
