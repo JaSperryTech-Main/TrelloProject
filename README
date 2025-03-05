@@ -1,0 +1,32 @@
+Python SETUP:
+run: cd backend
+run: python -m venv venv
+run: pip install -r requirements.txt
+
+Setup Backend:
+run: cd backend
+run: pnpm install
+
+Setup Frontend:
+run: cd backend
+run: pnpm install
+
+Startup:
+run: cd backend
+run: pnpm dev
+run: cd ../frontend
+run: pnpm dev
+
+Convert Resources:
+do: Startup
+open: http://localhost:3000/api/update
+
+Use Cases:
+All SOC Codes:
+open: http://localhost:5173/job/soc
+Specific SOC Code:
+open: http://localhost:5173/job/soc/id
+All CIP Codes:
+open: http://localhost:5173/job/cip
+Specific CIP Code:
+open: http://localhost:5173/job/cip/id
