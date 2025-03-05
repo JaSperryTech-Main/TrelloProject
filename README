@@ -30,3 +30,7 @@ All CIP Codes:
 open: http://localhost:5173/job/cip
 Specific CIP Code:
 open: http://localhost:5173/job/cip/id
+
+DOCKER USE:
+
+FRONTEND USES :80 NOT 5173
