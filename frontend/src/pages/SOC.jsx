@@ -33,14 +33,12 @@ const SOC = () => {
   if (loading) return <p>Loading data...</p>;
   if (error) return <p>Error: {error}</p>;
 
-  console.debug(data);
-
   return (
     <main>
       {id ? (
         <>
           <h1>
-            {data?.data?.cip?.[0]?.['SOC Title'] || 'Job Title Not Available'}
+            {data?.data?.cip?.[0]?.['CIP Title'] || 'Job Title Not Available'}
             {' ('}
             {data?.data?.cip?.[0]?.['Educ Level'] || 'Educ Level Not Available'}
             {')'}

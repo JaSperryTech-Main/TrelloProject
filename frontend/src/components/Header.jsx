@@ -3,7 +3,7 @@ import { TbSearch } from 'react-icons/tb';
 
 const Header = () => {
   return (
-    <nav>
+    <nav id="mainHeader">
       <img src="" alt="Icon" id="headerIcon" className="Icon" />
       <div id="searchBar">
         <TbSearch />
