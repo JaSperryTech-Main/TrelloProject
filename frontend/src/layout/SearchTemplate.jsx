@@ -1,4 +1,4 @@
-const Search = () => {
+const SearchTemplate = () => {
   return (
     <main>
       <nav>
@@ -15,4 +15,4 @@ const Search = () => {
   );
 };
 
-export default Search;
+export default SearchTemplate;

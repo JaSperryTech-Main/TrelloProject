@@ -72,31 +72,65 @@ async function searchSOCCode(socCode) {
   return results;
 }
 
-// Function to display the results in a readable format
-// For Debugging
-function displayResults(socCode, results) {
-  console.log(`Results for SOC Code: ${socCode}`);
+async function searchCIPCode(cipCode) {
+  // Load the CIP and SOC data
+  const CIPData = await loadJSON('./output/pa_cip_soc.json');
+  const paIdolData = await loadJSON('./output/pa_idol.json');
+  const wdaHpoData = await loadJSON('./output/wda_hpo_lists.json');
 
-  if (results.cip) {
-    console.log('\nCIP and Related SOCs:');
-    console.log(results.cip);
-  } else {
-    console.log('\nNo match found in CIP and Related SOCs.');
+  if (!CIPData || !paIdolData || !wdaHpoData) {
+    console.log('Failed to load one or more files.');
+    return;
   }
 
-  if (results.paIdol) {
-    console.log('\nPA Idol Data:');
-    console.log(results.paIdol);
-  } else {
-    console.log('\nNo match found in PA Idol.');
+  // Initialize the results object to hold the found data
+  const results = {
+    cip: [],
+    paIdol: [],
+    wdaHpo: [],
+  };
+
+  // Get the SOC codes associated with the CIP code
+  const socGroup = CIPData['CIPxSOC 2015']
+    .filter((item) => item['CIP Code'] === cipCode)
+    .map((soc) => soc['SOC Code']);
+
+  for (let i = 0; i < socGroup.length; i++) {
+    const socCode = socGroup[i];
+
+    // Search in CIP data
+    const cipMatch = CIPData['CIPxSOC 2015'].filter(
+      (item) => item['SOC Code'] === socCode
+    );
+    if (cipMatch.length > 0) {
+      results.cip.push(...cipMatch);
+    }
+
+    // Search in PA Idol data
+    let paIdolMatches = [];
+    paIdolData.pages.forEach((page) => {
+      page.tables.forEach((table) => {
+        table.forEach((row) => {
+          if (row['SOC\nCode'] == socCode) {
+            paIdolMatches.push(row);
+          }
+        });
+      });
+    });
+    if (paIdolMatches.length > 0) {
+      results.paIdol.push(...paIdolMatches);
+    }
+
+    // Search in WDA HPO data
+    const wdaHpoMatch = wdaHpoData.NW.find(
+      (item) => item['SOC Code'] === socCode
+    );
+    if (wdaHpoMatch) {
+      results.wdaHpo.push(wdaHpoMatch);
+    }
   }
 
-  if (results.wdaHpo) {
-    console.log('\nWDA HPO Data:');
-    console.log(results.wdaHpo);
-  } else {
-    console.log('\nNo match found in WDA HPO lists.');
-  }
+  return results;
 }
 
 async function getAllCIPCodes() {
@@ -107,11 +141,58 @@ async function getAllCIPCodes() {
     return;
   }
 
-  const allCIPCodes = [
-    ...new Set(CIPData['CIPxSOC 2015'].map((item) => item['CIP Code'])),
-  ];
+  // Create a Map to store unique CIP Codes with their respective titles
+  const uniqueCIPCodesMap = new Map();
+
+  // Iterate over the CIP data
+  CIPData['CIPxSOC 2015'].forEach((item) => {
+    const code = item['CIP Code'];
+    const title = item['CIP Title'];
+
+    // Only add the CIP code if it doesn't exist already in the Map
+    if (!uniqueCIPCodesMap.has(code)) {
+      uniqueCIPCodesMap.set(code, title);
+    }
+  });
+
+  // Convert the Map to an array of objects with both code and title
+  const allCIPCodes = Array.from(uniqueCIPCodesMap, ([code, title]) => ({
+    code,
+    title,
+  }));
+
+  return allCIPCodes;
 }
 
-// Example usage: search for a specific SOC code (e.g., "25-2022" works on all jsons)
-// searchAndDisplaySOCCode('25-2022'); // Change this to the SOC Code you want to search
-export { searchSOCCode, getAllCIPCodes };
+async function getAllSOCCodes() {
+  const CIPData = await loadJSON('./output/pa_cip_soc.json');
+
+  if (!CIPData || !CIPData['CIPxSOC 2015']) {
+    console.error('Invalid data structure');
+    return;
+  }
+
+  // Create a Map to store unique SOC Codes with their respective titles
+  const uniqueSOCCodesMap = new Map();
+
+  // Iterate over the CIP data to extract SOC Codes and Titles
+  CIPData['CIPxSOC 2015'].forEach((item) => {
+    const code = item['SOC Code'];
+    const title = item['SOC Title'];
+
+    // Only add the SOC code if it doesn't exist already in the Map
+    if (code && !uniqueSOCCodesMap.has(code)) {
+      uniqueSOCCodesMap.set(code, title);
+    }
+  });
+
+  // Convert the Map to an array of objects with both code and title
+  const allSOCCodes = Array.from(uniqueSOCCodesMap, ([code, title]) => ({
+    code,
+    title,
+  }));
+
+  return allSOCCodes;
+}
+
+export { searchSOCCode, searchCIPCode, getAllCIPCodes, getAllSOCCodes };
