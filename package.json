@@ -5,5 +5,13 @@
   "workspaces": [
     "backend",
     "frontend"
-  ]
+  ],
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "scripts": {
+    "start": "concurrently \"pnpm run server\" \"pnpm run client\"",
+    "server": "cd backend && pnpm dev",
+    "client": "cd frontend && pnpm dev"
+  }
 }
