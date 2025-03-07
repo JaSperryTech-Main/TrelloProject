@@ -23,7 +23,6 @@ router.get('/', async (req, res) => {
       console.log(`Python script exited with code ${code}`);
     });
 
-    // Include both data in the response
     res.status(200).send('Excel files processed successfully');
   } catch (error) {
     console.error('Error converting Excel file:', error);

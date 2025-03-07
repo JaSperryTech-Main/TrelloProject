@@ -19,6 +19,9 @@ RUN npm run build
 # Use a lighter web server (Nginx) to serve the Vite app
 FROM nginx:alpine
 
+# Copy the custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Copy the build files from the build stage to Nginx's serving directory
 COPY --from=build /app/dist /usr/share/nginx/html
 
