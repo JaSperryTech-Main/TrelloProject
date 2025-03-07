@@ -1,5 +1,6 @@
 import { TbSearch } from 'react-icons/tb';
 import { useState } from 'react';
+import SearchBar from './SearchBar.jsx';
 
 const Header = () => {
   const [isUpdating, setIsUpdating] = useState(false);
@@ -38,12 +39,7 @@ const Header = () => {
       />
       <div id="searchBar" className="searchBar">
         <TbSearch className="searchIcon" />
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Search..."
-          aria-label="Search"
-        />
+        <SearchBar />
       </div>
       <button
         onClick={handleUpdateClick}
