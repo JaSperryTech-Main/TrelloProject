@@ -9,7 +9,7 @@ const SearchBar = () => {
 
   const isValidID = (id) => {
     // CIP format: XX.XXXX (digits with decimal)
-    // SOC format: XXXX (digits)
+    // SOC format: XX-XXXX (digits with hyphen)
     const cipPattern = /^\d{2}\.\d{4}$/;
     const socPattern = /^\d{2}-\d{4}$/;
     return cipPattern.test(id) ? 'cip' : socPattern.test(id) ? 'soc' : null;

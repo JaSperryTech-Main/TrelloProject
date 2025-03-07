@@ -1,5 +1,5 @@
-# Use the official Node.js v22 as the base image for building the app
-FROM node:22 AS build
+# Use the official Node.js LTS as the base image for building the app
+FROM node:20 AS build
 
 # Set the working directory in the container
 WORKDIR /app

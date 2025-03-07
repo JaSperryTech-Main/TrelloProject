@@ -8,9 +8,8 @@ run: cd backend
 run: pnpm install
 
 Setup Frontend:
-run: cd backend
+run: cd frontend
 run: pnpm install
-
 Startup:
 run: cd backend
 run: pnpm dev
