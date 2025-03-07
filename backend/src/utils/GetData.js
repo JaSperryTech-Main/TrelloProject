@@ -18,7 +18,18 @@ async function loadJSON(filepath) {
   }
 }
 
-// Function to search for a SOC Code in all files
+/**
+ * Searches for the specified SOC code within CIP, PA Idol, and WDA HPO datasets.
+ *
+ * This asynchronous function loads three JSON files containing the data and searches each for items matching the provided SOC code. It filters the 'CIPxSOC 2015' data for CIP matches, iterates over PA Idol pages and tables to find a matching entry, and looks through the NW array in the WDA HPO data. If any of the files fail to load, it logs a warning and returns undefined.
+ *
+ * @param {string} socCode - The SOC code to search for in the datasets.
+ * @returns {Promise<Object|undefined>} A promise that resolves to an object with properties:
+ *   - `cip`: An array of matching entries from the CIP data, or `null` if no match was found.
+ *   - `paIdol`: The matching entry from the PA Idol data, or `null` if no match was found.
+ *   - `wdaHpo`: The matching entry from the WDA HPO data, or `null` if no match was found.
+ *   Returns `undefined` if any required file could not be loaded.
+ */
 async function searchSOCCode(socCode) {
   // Load the CIP and SOC data
   const CIPData = await loadJSON('./output/pa_cip_soc.json');
@@ -26,7 +37,7 @@ async function searchSOCCode(socCode) {
   const wdaHpoData = await loadJSON('./output/wda_hpo_lists.json');
 
   if (!CIPData || !paIdolData || !wdaHpoData) {
-    console.log('Failed to load one or more files.');
+    console.warn('Failed to load one or more files.');
     return;
   }
 
@@ -72,6 +83,21 @@ async function searchSOCCode(socCode) {
   return results;
 }
 
+/**
+ * Asynchronously aggregates data associated with a given CIP code from multiple JSON datasets.
+ *
+ * The function loads three JSON files containing CIP/SOC mappings, PA Idol data, and WDA HPO listings. It begins by extracting
+ * the SOC codes linked to the specified CIP code from the CIP/SOC data. It then searches for entries corresponding to those SOC codes
+ * within each dataset and compiles the results into separate arrays. If any required file fails to load, a warning is logged and
+ * the function returns undefined.
+ *
+ * @param {string} cipCode - The CIP code used to retrieve associated SOC codes and corresponding data entries.
+ * @returns {Promise<Object|undefined>} A promise that resolves to an object with properties:
+ *   - cip: Array containing matching entries from the CIP/SOC dataset.
+ *   - paIdol: Array containing matching entries from the PA Idol dataset.
+ *   - wdaHpo: Array containing matching entries from the WDA HPO dataset.
+ *   Returns undefined if one or more data files cannot be loaded.
+ */
 async function searchCIPCode(cipCode) {
   // Load the CIP and SOC data
   const CIPData = await loadJSON('./output/pa_cip_soc.json');
@@ -79,7 +105,7 @@ async function searchCIPCode(cipCode) {
   const wdaHpoData = await loadJSON('./output/wda_hpo_lists.json');
 
   if (!CIPData || !paIdolData || !wdaHpoData) {
-    console.log('Failed to load one or more files.');
+    console.warn('Failed to load one or more files.');
     return;
   }
 

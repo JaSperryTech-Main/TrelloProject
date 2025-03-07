@@ -5,5 +5,21 @@ services:
       dockerfile: backend/Dockerfile
     ports:
       - '3000:3000'
+    networks:
+      - app-network
     environment:
       - NODE_ENV=production
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

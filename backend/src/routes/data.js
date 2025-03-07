@@ -20,7 +20,6 @@ router.get('/cip/all', async (req, res) => {
 router.get('/soc/all', async (req, res) => {
   try {
     const data = await getAllSOCCodes();
-    console.log(data);
     res.json({ data });
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve data' });
