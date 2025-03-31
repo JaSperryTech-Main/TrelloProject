@@ -1,5 +1,6 @@
 import { TbSearch } from 'react-icons/tb';
 import { useState } from 'react';
+import { Link } from 'react-router';
 import SearchBar from './SearchBar.jsx';
 
 const Header = () => {
@@ -31,12 +32,15 @@ const Header = () => {
 
   return (
     <header id="mainHeader">
-      <img
-        src="/path/to/logo.png"
-        alt="Site Logo"
-        id="headerIcon"
-        className="icon"
-      />
+      <Link to="/">
+        <img
+          src="templateLogo.png"
+          alt="Site Logo"
+          id="headerIcon"
+          className="icon"
+        />
+      </Link>
+
       <div id="searchBar" className="searchBar">
         <TbSearch className="searchIcon" />
         <SearchBar />
@@ -49,6 +53,14 @@ const Header = () => {
         {isUpdating ? 'Updating...' : 'Update'}
       </button>
       {updateError && <div className="error">{updateError}</div>}
+
+      <Link to="/job/soc">
+        <button>SOCs</button>
+      </Link>
+
+      <Link to="/job/cip">
+        <button>CIPs</button>
+      </Link>
 
       <style jsx>{`
         #mainHeader {
@@ -98,7 +110,7 @@ const Header = () => {
           outline: none;
         }
 
-        .updateButton {
+        button {
           background-color: #2563eb;
           color: white;
           border: none;
@@ -110,11 +122,11 @@ const Header = () => {
           white-space: nowrap;
         }
 
-        .updateButton:hover:not(:disabled) {
+        button:hover:not(:disabled) {
           background-color: #1d4ed8;
         }
 
-        .updateButton:disabled {
+        button:disabled {
           background-color: #93c5fd;
           cursor: not-allowed;
         }
