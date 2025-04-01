@@ -37,7 +37,7 @@ const SearchBar = () => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value.trim())}
-            placeholder="Search CIP or SOC (e.g., 11.1023 or 151231)"
+            placeholder={error || 'Search CIP or SOC (e.g., 11.1023 or 151231)'}
             aria-label="Search by CIP or SOC ID"
             className="search-input"
           />
@@ -46,7 +46,6 @@ const SearchBar = () => {
           </button>
         </div>
       </form>
-      {error && <div className="search-error">{error}</div>}
 
       <style jsx>{`
         .search-container {

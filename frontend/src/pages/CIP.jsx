@@ -55,7 +55,7 @@ const JobDetails = ({ data, cipCode }) => {
     if (jobs[key]) {
       jobs[key].forEach((job) => {
         if (job['SOC Title']) {
-          allJobs.set(job['SOC Title'], { job, key }); // Store the key with the job
+          allJobs.set(job['SOC Title'], { job, key });
         }
       });
     }
