@@ -4,6 +4,7 @@ import CIP from './pages/CIP.jsx';
 import CIPTEST from './pages/CIPTEST.jsx';
 import { Routes, Route } from 'react-router';
 import Header from './components/Header.jsx';
+import Search from './pages/Search.jsx';
 
 const App = () => {
   return (
@@ -11,6 +12,8 @@ const App = () => {
       <Header />
       <Routes>
         <Route index element={<Home />} />
+
+        <Route path="search" element={<Search />} />
 
         <Route path="job">
           <Route path="soc">
