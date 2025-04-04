@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router';
 
 const Header = () => {
   const [isUpdating, setIsUpdating] = useState(false);
@@ -59,7 +60,13 @@ const Header = () => {
         )}
       </div>
 
-      <button>Search</button>
+      {/* Search Button as a Link */}
+      <Link
+        to="/search"
+        className="px-6 py-3 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors"
+      >
+        Search
+      </Link>
 
       {/* Mobile layout adjustments */}
       <style jsx>{`

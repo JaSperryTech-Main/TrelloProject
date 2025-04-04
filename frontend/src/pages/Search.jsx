@@ -30,7 +30,6 @@ const Search = () => {
   const debounceTimer = useRef(null);
   const searchInputRef = useRef(null);
 
-  // Available arrays for wda_hpo_lists.json
   const fetchAvailableArrays = async () => {
     try {
       const response = await fetch('http://localhost:3000/api/arrays');
@@ -45,7 +44,6 @@ const Search = () => {
     }
   };
 
-  // Load recent searches from localStorage
   useEffect(() => {
     const savedSearches = localStorage.getItem('recentSearches');
     if (savedSearches) {
@@ -54,7 +52,6 @@ const Search = () => {
     fetchAvailableArrays();
   }, []);
 
-  // Debounce search
   useEffect(() => {
     if (query.trim() === '') {
       setResults([]);
@@ -111,7 +108,37 @@ const Search = () => {
           'No results found. Try a different search term or adjust your settings.'
         );
       } else {
-        setResults(data.results);
+        // Process results to extract SOC/CIP codes when titles match
+        const processedResults = data.results.map((result) => {
+          // Find SOC/CIP code matches
+          const socMatch = result.matches.find(
+            (match) =>
+              match.field.toLowerCase().includes('soc code') ||
+              match.field.toLowerCase().endsWith('soc')
+          );
+
+          const cipMatch = result.matches.find(
+            (match) =>
+              match.field.toLowerCase().includes('cip code') ||
+              match.field.toLowerCase().endsWith('cip')
+          );
+
+          // Find title matches
+          const titleMatch = result.matches.find(
+            (match) =>
+              match.field.toLowerCase().includes('title') &&
+              !match.field.toLowerCase().includes('code')
+          );
+
+          return {
+            ...result,
+            socCode: socMatch?.value,
+            cipCode: cipMatch?.value,
+            titleMatch: titleMatch,
+          };
+        });
+
+        setResults(processedResults);
         addToRecentSearches(searchTerm);
       }
     } catch (err) {
@@ -158,20 +185,7 @@ const Search = () => {
   };
 
   const getResultLink = (result) => {
-    const cipMatch = result.matches.find((match) =>
-      match.field.toLowerCase().includes('cip')
-    );
-    const socMatch = result.matches.find((match) =>
-      match.field.toLowerCase().includes('soc')
-    );
-
-    if (cipMatch) {
-      return `/job/cip/${cipMatch.value}`;
-    } else if (socMatch) {
-      return `/job/soc/${socMatch.value}`;
-    } else {
-      return `/details/${result.file.replace('.json', '')}`;
-    }
+    return `/details/${result.file.replace('.json', '')}`;
   };
 
   const toggleSettings = () => {
@@ -191,6 +205,8 @@ const Search = () => {
 
     if (lastPart === 'SOC Code') return 'SOC';
     if (lastPart === 'CIP Code') return 'CIP';
+    if (lastPart === 'SOC Title') return 'SOC Title';
+    if (lastPart === 'CIP Title') return 'CIP Title';
 
     return lastPart;
   };
@@ -202,11 +218,9 @@ const Search = () => {
     let lastIndex = 0;
 
     positions.forEach((pos) => {
-      // Add text before the match
       if (pos.start > lastIndex) {
         result.push(text.substring(lastIndex, pos.start));
       }
-      // Add highlighted match
       result.push(
         <span className="bg-yellow-200 font-semibold">
           {text.substring(pos.start, pos.end)}
@@ -215,7 +229,6 @@ const Search = () => {
       lastIndex = pos.end;
     });
 
-    // Add remaining text after last match
     if (lastIndex < text.length) {
       result.push(text.substring(lastIndex));
     }
@@ -225,7 +238,6 @@ const Search = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-4 relative">
-      {/* Search form */}
       <form onSubmit={handleSearch} className="w-full">
         <div className="relative flex items-center">
           <div className="absolute left-3 text-gray-500">
@@ -238,8 +250,8 @@ const Search = () => {
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setShowRecent(true)}
             onBlur={() => setTimeout(() => setShowRecent(false), 200)}
-            placeholder="Search CIP or SOC (e.g., 11.1023 or 151231)"
-            aria-label="Search by CIP or SOC ID"
+            placeholder="Search by SOC/CIP code or title (e.g., 'Computer Support' or '15-1252')"
+            aria-label="Search by SOC/CIP code or title"
             className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
               error
                 ? 'border-red-500 focus:ring-red-200'
@@ -270,7 +282,6 @@ const Search = () => {
         </div>
       </form>
 
-      {/* Settings toggle */}
       <button
         onClick={toggleSettings}
         className="mt-2 flex items-center text-sm text-gray-600 hover:text-gray-900"
@@ -284,7 +295,6 @@ const Search = () => {
         )}
       </button>
 
-      {/* Settings panel */}
       {showSettings && (
         <div className="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <div className="space-y-4">
@@ -321,29 +331,10 @@ const Search = () => {
                 ))}
               </select>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Results per page
-              </label>
-              <select
-                value={searchSettings.perPage}
-                onChange={(e) =>
-                  handleSettingChange('perPage', parseInt(e.target.value))
-                }
-                className="w-full p-2 border border-gray-300 rounded-md"
-              >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-              </select>
-            </div>
           </div>
         </div>
       )}
 
-      {/* Error message */}
       {error && (
         <div className="mt-2 flex items-center text-red-600">
           <TbAlertCircle className="w-5 h-5 mr-2" />
@@ -351,7 +342,6 @@ const Search = () => {
         </div>
       )}
 
-      {/* Recent searches dropdown */}
       {showRecent && recentSearches.length > 0 && (
         <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
           <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-200 flex items-center">
@@ -371,13 +361,11 @@ const Search = () => {
         </div>
       )}
 
-      {/* Search results */}
       {results.length > 0 && (
         <div className="mt-4 space-y-3">
           {results.map((result, index) => (
-            <Link
+            <a
               key={index}
-              to={getResultLink(result)}
               className="block p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow hover:border-blue-500 group"
             >
               <div className="flex justify-between items-start">
@@ -385,24 +373,27 @@ const Search = () => {
                   <h3 className="font-medium text-gray-900 group-hover:text-blue-600">
                     {result.file.replace('.json', '')}
                   </h3>
+
+                  {/* Display title if available */}
+                  {result.titleMatch && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      {highlightMatch(
+                        result.titleMatch.value,
+                        result.titleMatch.positions
+                      )}
+                    </p>
+                  )}
+
                   {result.searchedArray && (
                     <span className="text-xs text-gray-500">
                       Array: {result.searchedArray}
                     </span>
                   )}
                 </div>
-                <TbExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-500" />
+                <Link to={getResultLink(result)}>
+                  <TbExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-500" />
+                </Link>
               </div>
-
-              {result.snippet && (
-                <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-                  {result.matches.map((match, i) => (
-                    <span key={i}>
-                      {highlightMatch(match.value, match.positions)}{' '}
-                    </span>
-                  ))}
-                </p>
-              )}
 
               <div className="mt-2 flex flex-wrap gap-1">
                 {result.matches.map((match, i) => {
@@ -426,24 +417,14 @@ const Search = () => {
                         {fieldName}: {match.value}
                       </span>
                     );
-                  } else {
-                    return (
-                      <span
-                        key={i}
-                        className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded"
-                      >
-                        {fieldName}
-                      </span>
-                    );
                   }
                 })}
               </div>
-            </Link>
+            </a>
           ))}
         </div>
       )}
 
-      {/* Loading indicator */}
       {isLoading && (
         <div className="mt-4 flex items-center text-gray-500">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400 mr-2"></div>
