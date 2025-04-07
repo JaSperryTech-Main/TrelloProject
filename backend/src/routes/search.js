@@ -90,17 +90,34 @@ async function searchJSONFiles(directory, options = {}) {
       })
     );
 
-    // Deduplicate based on file + first match id (you can customize this key)
+    // Deduplicate search results based on file + first match id
     const uniqueResultsMap = new Map();
 
     for (const result of searchResults) {
       const uniqueKey = `${result.file}-${result.matches[0]?.id || ''}`;
+
       if (!uniqueResultsMap.has(uniqueKey)) {
-        uniqueResultsMap.set(uniqueKey, result);
+        // Deduplicate matches based on match id
+        const seenIds = new Set();
+        const uniqueMatches = result.matches.filter((match) => {
+          if (!seenIds.has(match.id)) {
+            seenIds.add(match.id);
+            return true;
+          }
+          return false; // Skip if the match id is a duplicate
+        });
+
+        // Store result with deduplicated matches
+        uniqueResultsMap.set(uniqueKey, {
+          ...result,
+          matches: uniqueMatches,
+        });
       }
     }
 
     const uniqueResults = Array.from(uniqueResultsMap.values());
+
+    console.log(uniqueResults);
 
     // Sort and paginate
     uniqueResults.sort((a, b) => b.score - a.score);
