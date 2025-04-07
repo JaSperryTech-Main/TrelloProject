@@ -5,6 +5,7 @@ import CIPTEST from './pages/CIPTEST.jsx';
 import { Routes, Route } from 'react-router';
 import Header from './components/Header.jsx';
 import Search from './pages/Search.jsx';
+import Details from './pages/Details.jsx';
 
 const App = () => {
   return (
@@ -33,6 +34,8 @@ const App = () => {
             </Route>
           </Route>
         </Route>
+
+        <Route path="details/:id" element={<Details />} />
       </Routes>
     </>
   );

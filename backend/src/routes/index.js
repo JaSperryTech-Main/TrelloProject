@@ -49,4 +49,24 @@ router.get('/arrays', (req, res) => {
   }
 });
 
+router.get('/files/:id', (req, res) => {
+  const { id } = req.params; // Extract 'id' from URL params
+
+  try {
+    // Build the file path using the id (ensure the file exists in the given folder)
+    const filePath = path.join(__dirname, `../../output/${id}.json`);
+
+    // Read the file synchronously (for simplicity, use async version in production)
+    const rawData = fs.readFileSync(filePath, 'utf8');
+    const jsonData = JSON.parse(rawData); // Parse the file content as JSON
+
+    // Send the JSON data back to the client
+    res.json(jsonData);
+  } catch (error) {
+    // Handle errors (e.g., file not found or JSON parsing error)
+    console.error(error);
+    res.status(500).json({ error: 'Failed to retrieve or parse the file.' });
+  }
+});
+
 export default router;
