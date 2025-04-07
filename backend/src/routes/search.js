@@ -11,6 +11,7 @@ const OUTPUT_DIR = path.join(__dirname, '../../output');
 
 // Cache for storing search results (optional optimization)
 const searchCache = new Map();
+const CACHE_TTL = 300000;
 
 /**
  * Enhanced search function with field-specific searching and pagination
@@ -23,7 +24,7 @@ async function searchJSONFiles(directory, options = {}) {
     limit = 10,
     offset = 0,
     minScore = 0.5,
-    targetArray = null, // New parameter to specify which array to search
+    targetArray = null,
   } = options;
 
   try {
@@ -47,16 +48,26 @@ async function searchJSONFiles(directory, options = {}) {
           // Special handling for wda_hpo_lists.json
           if (file === 'wda_hpo_lists.json' && targetArray) {
             if (jsonData[targetArray]) {
-              // Only search within the specified array
               jsonData = { [targetArray]: jsonData[targetArray] };
             } else {
               return; // Skip if the specified array doesn't exist
             }
           }
 
+          // Special handling for pa_idol.json - remove pages[i].text before searching
+          if (file === 'pa_idol.json') {
+            if (jsonData.pages && Array.isArray(jsonData.pages)) {
+              jsonData.pages = jsonData.pages.map((page) => {
+                const { text, ...rest } = page;
+                return rest;
+              });
+            }
+          }
+
           const matches = findMatchesInObject(jsonData, searchTerm, {
             fields,
             caseSensitive,
+            file, // Pass file name for SOC/CIP identification
           });
 
           if (matches.length > 0) {
@@ -79,12 +90,25 @@ async function searchJSONFiles(directory, options = {}) {
       })
     );
 
-    searchResults.sort((a, b) => b.score - a.score);
-    const paginatedResults = searchResults.slice(offset, offset + limit);
+    // Deduplicate based on file + first match id (you can customize this key)
+    const uniqueResultsMap = new Map();
+
+    for (const result of searchResults) {
+      const uniqueKey = `${result.file}-${result.matches[0]?.id || ''}`;
+      if (!uniqueResultsMap.has(uniqueKey)) {
+        uniqueResultsMap.set(uniqueKey, result);
+      }
+    }
+
+    const uniqueResults = Array.from(uniqueResultsMap.values());
+
+    // Sort and paginate
+    uniqueResults.sort((a, b) => b.score - a.score);
+    const paginatedResults = uniqueResults.slice(offset, offset + limit);
 
     return {
       results: paginatedResults,
-      total: searchResults.length,
+      total: uniqueResults.length,
       limit,
       offset,
     };
@@ -97,38 +121,59 @@ async function searchJSONFiles(directory, options = {}) {
 /**
  * Recursively search for matches in an object
  */
-function findMatchesInObject(obj, searchTerm, options, path = '') {
+function findMatchesInObject(obj, searchTerm, options, path = '', root = obj) {
   const matches = [];
   const { fields, caseSensitive } = options;
 
   for (const [key, value] of Object.entries(obj)) {
     const currentPath = path ? `${path}.${key}` : key;
 
-    // Skip if specific fields are requested and this isn't one of them
     if (fields.length > 0 && !fields.includes(currentPath)) {
       continue;
     }
 
     if (typeof value === 'object' && value !== null) {
-      // Recursively search nested objects
       matches.push(
-        ...findMatchesInObject(value, searchTerm, options, currentPath)
+        ...findMatchesInObject(value, searchTerm, options, currentPath, root)
       );
     } else if (typeof value === 'string') {
       const textToSearch = caseSensitive ? value : value.toLowerCase();
-      if (textToSearch.includes(searchTerm)) {
+      const comparisonTerm = caseSensitive
+        ? searchTerm
+        : searchTerm.toLowerCase();
+
+      if (textToSearch.includes(comparisonTerm)) {
+        let code = null;
+        let type = null;
+
+        if (currentPath.includes('SOC Title')) {
+          type = 'SOC Code';
+          const codePath = currentPath.replace('SOC Title', 'SOC Code');
+          code = getValueFromPath(root, codePath);
+        } else if (currentPath.includes('CIP Title')) {
+          type = 'CIP Code';
+          const codePath = currentPath.replace('CIP Title', 'CIP Code');
+          code = getValueFromPath(root, codePath);
+        }
+
         matches.push({
+          id: code || null,
+          type: type || 'Unknown',
           field: currentPath,
           value,
-          // Add position information for highlighting
           positions: findMatchPositions(value, searchTerm, caseSensitive),
         });
       }
     } else if (typeof value === 'number' || typeof value === 'boolean') {
       const stringValue = String(value);
-      if (
-        (caseSensitive ? stringValue : stringValue.toLowerCase()) === searchTerm
-      ) {
+      const comparisonValue = caseSensitive
+        ? stringValue
+        : stringValue.toLowerCase();
+      const comparisonTerm = caseSensitive
+        ? searchTerm
+        : searchTerm.toLowerCase();
+
+      if (comparisonValue === comparisonTerm) {
         matches.push({
           field: currentPath,
           value: stringValue,
@@ -138,6 +183,13 @@ function findMatchesInObject(obj, searchTerm, options, path = '') {
   }
 
   return matches;
+}
+
+/**
+ * Helper function to get a value from a nested object using dot notation path
+ */
+function getValueFromPath(obj, path) {
+  return path.split('.').reduce((o, k) => (o || {})[k], obj);
 }
 
 /**
@@ -199,12 +251,23 @@ router.get('/', async (req, res) => {
       page = 1,
       per_page = 10,
       cache = 'true',
-      array: targetArray, // New parameter to specify which array to search in wda_hpo_lists.json
+      array: targetArray,
     } = req.query;
 
     if (!keyword) {
       return res.status(400).json({
         error: 'Search query parameter "q" is required',
+        suggested_fix: 'Add ?q=your_search_term to your request URL',
+      });
+    }
+
+    // Validate page and per_page
+    const pageNum = parseInt(page);
+    const perPageNum = parseInt(per_page);
+    if (isNaN(pageNum) || isNaN(perPageNum) || pageNum < 1 || perPageNum < 1) {
+      return res.status(400).json({
+        error: 'Invalid pagination parameters',
+        details: 'page and per_page must be positive integers',
       });
     }
 
@@ -214,11 +277,15 @@ router.get('/', async (req, res) => {
       case_sensitive,
       page,
       per_page,
-      targetArray, // Include in cache key
+      targetArray,
     });
 
-    if (cache === 'true' && searchCache.has(cacheKey)) {
-      return res.json(searchCache.get(cacheKey));
+    // Cache handling
+    if (cache === 'true') {
+      const cached = searchCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        return res.json(cached.data);
+      }
     }
 
     const fieldsArray = fields ? fields.split(',') : [];
@@ -227,9 +294,9 @@ router.get('/', async (req, res) => {
       keyword,
       fields: fieldsArray,
       caseSensitive: case_sensitive === 'true',
-      limit: parseInt(per_page),
-      offset: (parseInt(page) - 1) * parseInt(per_page),
-      targetArray, // Pass to search function
+      limit: perPageNum,
+      offset: (pageNum - 1) * perPageNum,
+      targetArray,
     });
 
     const response = {
@@ -237,9 +304,9 @@ router.get('/', async (req, res) => {
       results: results.results,
       pagination: {
         total: results.total,
-        page: parseInt(page),
-        per_page: parseInt(per_page),
-        total_pages: Math.ceil(results.total / parseInt(per_page)),
+        page: pageNum,
+        per_page: perPageNum,
+        total_pages: Math.ceil(results.total / perPageNum),
       },
       meta: {
         fields_searched: fieldsArray.length > 0 ? fieldsArray : 'all',
@@ -249,10 +316,10 @@ router.get('/', async (req, res) => {
     };
 
     if (cache === 'true') {
-      searchCache.set(cacheKey, response);
-      setTimeout(() => {
-        searchCache.delete(cacheKey);
-      }, 300000);
+      searchCache.set(cacheKey, {
+        data: response,
+        timestamp: Date.now(),
+      });
     }
 
     res.json(response);
@@ -260,7 +327,8 @@ router.get('/', async (req, res) => {
     console.error('Search API error:', error);
     res.status(500).json({
       error: 'An error occurred while processing your search',
-      details: error.message,
+      details:
+        process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });

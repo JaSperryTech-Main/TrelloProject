@@ -18,17 +18,27 @@ def pdf_to_json(pdf_url, json_path):
     # Extract text and tables from the PDF
     with pdfplumber.open(tmp_pdf_path) as pdf:
         for page_num, page in enumerate(pdf.pages, start=1):
-            text = page.extract_text() or ""
+            # Clean text by replacing newlines
+            text = (page.extract_text() or "").replace('\n', ' ').strip()
             tables = page.extract_tables()
             structured_tables = []
 
             for table in tables:
-                headers = table[1]  # Extract headers from second row
+                if len(table) < 2:
+                    continue  # Skip if there's no header row
+
+                # Clean headers
+                headers = [h.replace('\n', ' ').strip() if h else "" for h in table[1]]
                 structured_table = []
 
-                for row in table[2:]:  # Extract data rows
-                    structured_table.append(
-                        {headers[i]: row[i] for i in range(len(headers))})
+                for row in table[2:]:
+                    if not row:
+                        continue  # Skip empty rows
+
+                    # Clean each cell in the row
+                    cleaned_row = [cell.replace('\n', ' ').strip() if cell else "" for cell in row]
+                    row_dict = {headers[i]: cleaned_row[i] for i in range(len(headers))}
+                    structured_table.append(row_dict)
 
                 structured_tables.append(structured_table)
 

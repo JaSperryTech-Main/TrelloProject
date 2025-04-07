@@ -169,6 +169,11 @@ const Search = () => {
 
   const handleCodeClick = (e, value, type) => {
     e.stopPropagation();
+    if (type === 'SOC Code') {
+      type = 'soc';
+    } else if (type === 'CIP Code') {
+      type = 'cip';
+    }
     navigate(`/job/${type}/${value}`);
   };
 
@@ -396,28 +401,23 @@ const Search = () => {
               </div>
 
               <div className="mt-2 flex flex-wrap gap-1">
-                {result.matches.map((match, i) => {
+                {result.matches.map((match) => {
                   const isSoc = match.field.toLowerCase().includes('soc');
-                  const isCip = match.field.toLowerCase().includes('cip');
                   const fieldName = formatFieldName(match.field);
 
-                  if (isSoc || isCip) {
-                    return (
-                      <span
-                        key={i}
-                        onClick={(e) =>
-                          handleCodeClick(e, match.value, isSoc ? 'soc' : 'cip')
-                        }
-                        className={`px-2 py-1 text-xs rounded cursor-pointer ${
-                          isSoc
-                            ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-                            : 'bg-green-100 text-green-800 hover:bg-green-200'
-                        }`}
-                      >
-                        {fieldName}: {match.value}
-                      </span>
-                    );
-                  }
+                  return (
+                    <span
+                      key={match.id}
+                      onClick={(e) => handleCodeClick(e, match.id, match.type)}
+                      className={`px-2 py-1 text-xs rounded cursor-pointer ${
+                        isSoc
+                          ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                          : 'bg-green-100 text-green-800 hover:bg-green-200'
+                      }`}
+                    >
+                      {fieldName}: {match.value} ({match.id})
+                    </span>
+                  );
                 })}
               </div>
             </a>
