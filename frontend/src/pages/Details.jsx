@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom'; // Use 'react-router-dom' for newer versions of React Router
+import { useParams } from 'react-router';
 
 const Details = () => {
-  const { id } = useParams(); // Get the 'id' from the URL params
+  const { id } = useParams();
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true); // To manage loading state
-  const [error, setError] = useState(null); // For handling errors
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const getFileFromAPI = async () => {
@@ -19,14 +19,14 @@ const Details = () => {
         const jsonData = await response.json();
         setData(jsonData);
       } catch (err) {
-        setError(err.message); // Set error if any occurs during the fetch
+        setError(err.message);
       } finally {
-        setLoading(false); // Stop loading once the data is fetched
+        setLoading(false);
       }
     };
 
-    getFileFromAPI(); // Call the function to fetch data
-  }, [id]); // Run this effect when the 'id' changes
+    getFileFromAPI();
+  }, [id]);
 
   // Display loading state or error if applicable
   if (loading) {
@@ -40,7 +40,6 @@ const Details = () => {
   return (
     <main>
       <h1>Details for Item {id}</h1>
-      {/* Display the raw JSON */}
       <pre>{JSON.stringify(data, null, 2)}</pre>
     </main>
   );
