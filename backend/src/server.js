@@ -18,7 +18,7 @@ app.use(express.json());
 
 app.use('/api', routes);
 
-const PORT = 3000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
-  console.log('Server Listening on http://localhost:3000');
+  console.log(`Server Listening on http://localhost:${process.env.PORT}`);
 });

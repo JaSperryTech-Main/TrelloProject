@@ -9,8 +9,8 @@ const SOC = () => {
 
   useEffect(() => {
     const endpoint = id
-      ? `http://localhost:3000/api/data/soc/${id}`
-      : `http://localhost:3000/api/data/soc/all`;
+      ? `${import.meta.env.VITE_BACKEND_URL}/data/soc/${id}`
+      : `${import.meta.env.VITE_BACKEND_URL}/data/soc/all`;
 
     const fetchData = async () => {
       try {
@@ -28,27 +28,34 @@ const SOC = () => {
     fetchData();
   }, [id]);
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="loading-state">
-        <div className="spinner"></div>
+      <div className="flex items-center justify-center gap-4 p-8 text-gray-700 text-lg">
+        <div className="w-6 h-6 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
         Loading...
       </div>
     );
+  }
 
-  if (error) return <div className="error-state">⚠️ Error: {error}</div>;
+  if (error) {
+    return (
+      <div className="p-8 text-red-600 bg-red-50 rounded-lg m-8 text-center">
+        ⚠️ Error: {error}
+      </div>
+    );
+  }
 
   return (
-    <main className="container">
+    <main className="container mx-auto px-4 py-8 max-w-6xl min-h-[80vh]">
       {id ? (
         <div className="detail-view">
-          <header className="detail-header">
-            <h1 className="detail-title">
-              <span className="title-main">
+          <header className="mb-8 pb-6 border-b-2 border-gray-200">
+            <h1 className="text-3xl m-0 leading-tight">
+              <span className="block text-indigo-900 mb-2">
                 {data?.data?.cip?.[0]?.['CIP Title'] ||
                   'Job Title Not Available'}
               </span>
-              <span className="title-meta">
+              <span className="text-xl text-gray-600">
                 (
                 {data?.data?.cip?.[0]?.['Educ Level'] ||
                   'Education Level Not Available'}
@@ -59,21 +66,21 @@ const SOC = () => {
         </div>
       ) : (
         <div className="list-view">
-          <h1 className="list-title">All SOC Jobs</h1>
-          <div className="grid-list">
+          <h1 className="text-3xl text-indigo-900 mb-8">All SOC Jobs</h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.isArray(data.data) && data.data.length > 0 ? (
               data.data.map((job, index) => (
                 <a
                   key={index}
-                  href={`http://localhost:5173/job/soc/${job.code}`}
-                  className="job-card-link"
+                  href={`job/soc/${job.code}`}
+                  className="no-underline text-current"
                 >
-                  <article className="job-card">
-                    <h3 className="job-title">
-                      <span className="title-text">
+                  <article className="border border-gray-200 rounded-lg p-6 bg-white transition-all hover:shadow-md hover:-translate-y-1">
+                    <h3 className="m-0">
+                      <span className="block text-gray-800 mb-1">
                         {job.title || 'Unknown Title'}
                       </span>
-                      <span className="title-code">
+                      <span className="block text-sm text-gray-500">
                         {job.code || 'Unknown Code'}
                       </span>
                     </h3>
@@ -81,163 +88,13 @@ const SOC = () => {
                 </a>
               ))
             ) : (
-              <div className="empty-state">No jobs available</div>
+              <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-200 rounded-lg col-span-full">
+                No jobs available
+              </div>
             )}
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        .container {
-          padding: 2rem;
-          max-width: 1200px;
-          margin: 0 auto;
-          min-height: 80vh;
-        }
-
-        /* Loading and Error States */
-        .loading-state {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 1rem;
-          padding: 2rem;
-          color: #4a5568;
-          font-size: 1.2rem;
-        }
-
-        .spinner {
-          width: 24px;
-          height: 24px;
-          border: 3px solid #e2e8f0;
-          border-top-color: #4299e1;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-
-        .error-state {
-          padding: 2rem;
-          color: #dc2626;
-          background: #fef2f2;
-          border-radius: 0.5rem;
-          margin: 2rem;
-          text-align: center;
-        }
-
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        /* Detail View */
-        .detail-header {
-          margin-bottom: 2rem;
-          padding-bottom: 1.5rem;
-          border-bottom: 2px solid #e2e8f0;
-        }
-
-        .detail-title {
-          font-size: 2rem;
-          margin: 0;
-          line-height: 1.3;
-        }
-
-        .title-main {
-          display: block;
-          color: #1a237e;
-          margin-bottom: 0.5rem;
-        }
-
-        .title-meta {
-          font-size: 1.25rem;
-          color: #4a5568;
-        }
-
-        /* List View */
-        .list-title {
-          font-size: 2rem;
-          color: #1a237e;
-          margin-bottom: 2rem;
-        }
-
-        .grid-list {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 1.5rem;
-        }
-
-        .job-card-link {
-          text-decoration: none;
-          color: inherit;
-        }
-
-        .job-card {
-          border: 1px solid #e2e8f0;
-          border-radius: 0.5rem;
-          padding: 1.5rem;
-          background: white;
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .job-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .job-title {
-          margin: 0;
-          font-size: 1.1rem;
-          line-height: 1.4;
-        }
-
-        .title-text {
-          display: block;
-          color: #2d3748;
-          margin-bottom: 0.25rem;
-        }
-
-        .title-code {
-          display: block;
-          font-size: 0.9rem;
-          color: #718096;
-        }
-
-        .empty-state {
-          text-align: center;
-          padding: 3rem;
-          color: #718096;
-          border: 2px dashed #e2e8f0;
-          border-radius: 0.5rem;
-          grid-column: 1 / -1;
-        }
-
-        @media (max-width: 768px) {
-          .container {
-            padding: 1rem;
-          }
-
-          .detail-title {
-            font-size: 1.5rem;
-          }
-
-          .title-meta {
-            font-size: 1rem;
-          }
-
-          .list-title {
-            font-size: 1.5rem;
-          }
-
-          .grid-list {
-            grid-template-columns: 1fr;
-          }
-
-          .job-card {
-            padding: 1rem;
-          }
-        }
-      `}</style>
     </main>
   );
 };
