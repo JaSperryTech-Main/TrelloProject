@@ -11,7 +11,7 @@ const links = [
 
 router.get('/', async (req, res) => {
   try {
-    await convertExcel(links[0], 'NW', 'vertical');
+    await convertExcel(links[0], '', 'vertical');
     await convertExcel(links[1], 'CIPxSOC 2015', 'horizontal');
     const convertPDF = spawn('python', ['./src/script/convertPDF.py']);
 

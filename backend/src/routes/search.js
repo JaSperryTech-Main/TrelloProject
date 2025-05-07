@@ -117,6 +117,8 @@ async function searchJSONFiles(directory, options = {}) {
 
     const uniqueResults = Array.from(uniqueResultsMap.values());
 
+    console.log(uniqueResults);
+
     // Sort and paginate
     uniqueResults.sort((a, b) => b.score - a.score);
     const paginatedResults = uniqueResults.slice(offset, offset + limit);
