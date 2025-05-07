@@ -38,7 +38,6 @@ router.get('/soc/:id', async (req, res) => {
 
 router.get('/cip/:id', async (req, res) => {
   const { id } = req.params;
-  console.log(id);
   try {
     const data = await searchCIPCode(id);
     res.json({ data });

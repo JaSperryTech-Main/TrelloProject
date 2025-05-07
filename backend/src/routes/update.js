@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
     });
 
     convertPDF.on('close', (code) => {
-      console.log(`Python script exited with code ${code}`);
+      console.error(`Python script exited with code ${code}`);
     });
 
     res.status(200).json({ message: 'Excel files processed successfully' });

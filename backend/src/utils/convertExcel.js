@@ -87,8 +87,6 @@ const convertFileToJson = async (filepath, allowedSheets, headerType) => {
 
     fs.writeFileSync(outputFilePath, JSON.stringify(jsonData, null, 2));
 
-    console.log(`Conversion successful! JSON saved to ${outputFilePath}`);
-
     return jsonData;
   } catch (error) {
     console.error('Error converting file:', error);
@@ -107,7 +105,6 @@ const processFileFromUrl = async (fileUrl, allowedSheets, headerType) => {
   if (fs.existsSync(outputFilePath)) {
     try {
       const cachedData = fs.readFileSync(outputFilePath, 'utf8');
-      console.log(`Using cached JSON from ${outputFilePath}`);
       return JSON.parse(cachedData);
     } catch (error) {
       console.error('Error reading cached file:', error);
