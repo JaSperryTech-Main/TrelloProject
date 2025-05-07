@@ -9,8 +9,8 @@ const SOC = () => {
 
   useEffect(() => {
     const endpoint = id
-      ? `http://localhost:3000/api/data/soc/${id}`
-      : `http://localhost:3000/api/data/soc/all`;
+      ? `${import.meta.env.VITE_BACKEND_URL}/data/soc/${id}`
+      : `${import.meta.env.VITE_BACKEND_URL}/data/soc/all`;
 
     const fetchData = async () => {
       try {

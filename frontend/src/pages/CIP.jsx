@@ -27,8 +27,8 @@ const CIP = () => {
 
   const endpoint = useMemo(() => {
     return id
-      ? `http://localhost:3000/api/data/cip/${id}`
-      : `http://localhost:3000/api/data/cip/all`;
+      ? `${import.meta.env.VITE_BACKEND_URL}/data/cip/${id}`
+      : `${import.meta.env.VITE_BACKEND_URL}/data/cip/all`;
   }, [id]);
 
   useEffect(() => {

@@ -10,7 +10,9 @@ const Details = () => {
   useEffect(() => {
     const getFileFromAPI = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/files/${id}`);
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/files/${id}`
+        );
 
         if (!response.ok) {
           throw new Error('Item not found');

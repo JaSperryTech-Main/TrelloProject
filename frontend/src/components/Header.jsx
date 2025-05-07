@@ -10,9 +10,12 @@ const Header = () => {
     setUpdateError(null);
 
     try {
-      const response = await fetch('http://localhost:3000/api/update', {
-        method: 'GET',
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/update`,
+        {
+          method: 'GET',
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Update failed with status: ${response.status}`);

@@ -32,7 +32,9 @@ const Search = () => {
 
   const fetchAvailableArrays = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/arrays');
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/arrays`
+      );
       if (!response.ok) {
         throw new Error('Failed to fetch available arrays');
       }
@@ -94,7 +96,7 @@ const Search = () => {
       });
 
       const response = await fetch(
-        `http://localhost:3000/api/search?${params.toString()}`
+        `${import.meta.env.VITE_BACKEND_URL}/search?${params.toString()}`
       );
 
       if (!response.ok) {
