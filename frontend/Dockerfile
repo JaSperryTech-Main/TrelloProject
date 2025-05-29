@@ -1,32 +1,31 @@
-# Use the official Node.js LTS as the base image for building the app
+# Stage 1: Build the Vite app
 FROM node:20 AS build
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json (or yarn.lock) to install dependencies
-COPY package*.json ./
+# Declare VITE_BACKEND_URL as a build argument
+ARG VITE_BACKEND_URL
+ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
 
-# Install dependencies (including Vite)
+# Install dependencies
+COPY package*.json ./
 RUN npm install
 
-# Copy the rest of the application files
+# Copy source code
 COPY . .
 
-# Build the Vite app for production
+# Build the app (Vite will read VITE_BACKEND_URL from ENV)
 RUN npm run build
 
-# Use a lighter web server (Nginx) to serve the Vite app
+# Stage 2: Serve with Nginx
 FROM nginx:alpine
 
-# Copy the custom Nginx configuration
+# Use custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy the build files from the build stage to Nginx's serving directory
+# Copy built files to Nginx's HTML dir
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose port 80 (the Nginx default port)
 EXPOSE 80
 
-# Run nginx in the foreground
 CMD ["nginx", "-g", "daemon off;"]

@@ -1,11 +1,12 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
 
-import routes from './routes/index.js';
+import routes from "./routes/index.js";
 
 const coreConfig = {
-  origin: '*',
+  origin: ["http://localhost", "http://localhost:80", 'http://frontend', 'http://backend:3000'],
+  credentials: true,
 };
 
 dotenv.config();
@@ -16,9 +17,9 @@ app.use(cors(coreConfig));
 
 app.use(express.json());
 
-app.use('/api', routes);
+app.use("/api", routes);
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server Listening on http://localhost:${process.env.PORT}`);
+  console.log(`Server Listening on http://localhost:${PORT}`);
 });

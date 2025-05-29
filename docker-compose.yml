@@ -9,16 +9,24 @@ services:
       - app-network
     environment:
       - NODE_ENV=production
+    env_file:
+      - backend/.env
 
   frontend:
     build:
       context: ./frontend
+      args:
+        VITE_BACKEND_URL: /api
     ports:
       - '80:80'
     depends_on:
       - backend
     networks:
       - app-network
+    env_file:
+      - frontend/.env
+    environment:
+      - NODE_ENV=production
 
 networks:
   app-network:

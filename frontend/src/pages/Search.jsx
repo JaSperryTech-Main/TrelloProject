@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 import {
   TbSearch,
   TbX,
@@ -8,13 +8,13 @@ import {
   TbSettings,
   TbChevronDown,
   TbChevronUp,
-} from 'react-icons/tb';
-import { Link, useNavigate } from 'react-router';
+} from "react-icons/tb";
+import { Link, useNavigate } from "react-router";
 
 const Search = () => {
   const navigate = useNavigate();
-  const [query, setQuery] = useState('');
-  const [error, setError] = useState('');
+  const [query, setQuery] = useState("");
+  const [error, setError] = useState("");
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [recentSearches, setRecentSearches] = useState([]);
@@ -22,7 +22,7 @@ const Search = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [searchSettings, setSearchSettings] = useState({
     caseSensitive: false,
-    targetArray: '',
+    targetArray: "",
     fields: [],
     perPage: 5,
   });
@@ -32,22 +32,23 @@ const Search = () => {
 
   const fetchAvailableArrays = async () => {
     try {
+      console.log("VITE_BACKEND_URL:", import.meta.env.VITE_BACKEND_URL);
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/arrays`
       );
       if (!response.ok) {
-        throw new Error('Failed to fetch available arrays');
+        throw new Error("Failed to fetch available arrays");
       }
       const data = await response.json();
       setAvailableArrays(data.arrays || []);
     } catch (err) {
-      console.error('Error fetching arrays:', err);
+      console.error("Error fetching arrays:", err);
       setAvailableArrays([]);
     }
   };
 
   useEffect(() => {
-    const savedSearches = localStorage.getItem('recentSearches');
+    const savedSearches = localStorage.getItem("recentSearches");
     if (savedSearches) {
       setRecentSearches(JSON.parse(savedSearches));
     }
@@ -55,7 +56,7 @@ const Search = () => {
   }, []);
 
   useEffect(() => {
-    if (query.trim() === '') {
+    if (query.trim() === "") {
       setResults([]);
       return;
     }
@@ -79,19 +80,19 @@ const Search = () => {
     if (!searchTerm.trim()) return;
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       const params = new URLSearchParams({
         q: searchTerm,
         page: 1,
         per_page: searchSettings.perPage,
-        case_sensitive: searchSettings.caseSensitive ? 'true' : 'false',
+        case_sensitive: searchSettings.caseSensitive ? "true" : "false",
         ...(searchSettings.targetArray && {
           array: searchSettings.targetArray,
         }),
         ...(searchSettings.fields.length > 0 && {
-          fields: searchSettings.fields.join(','),
+          fields: searchSettings.fields.join(","),
         }),
       });
 
@@ -100,14 +101,14 @@ const Search = () => {
       );
 
       if (!response.ok) {
-        throw new Error('Search failed. Please try again.');
+        throw new Error("Search failed. Please try again.");
       }
 
       const data = await response.json();
 
       if (data.results.length === 0) {
         setError(
-          'No results found. Try a different search term or adjust your settings.'
+          "No results found. Try a different search term or adjust your settings."
         );
       } else {
         // Process results to extract SOC/CIP codes when titles match
@@ -115,21 +116,21 @@ const Search = () => {
           // Find SOC/CIP code matches
           const socMatch = result.matches.find(
             (match) =>
-              match.field.toLowerCase().includes('soc code') ||
-              match.field.toLowerCase().endsWith('soc')
+              match.field.toLowerCase().includes("soc code") ||
+              match.field.toLowerCase().endsWith("soc")
           );
 
           const cipMatch = result.matches.find(
             (match) =>
-              match.field.toLowerCase().includes('cip code') ||
-              match.field.toLowerCase().endsWith('cip')
+              match.field.toLowerCase().includes("cip code") ||
+              match.field.toLowerCase().endsWith("cip")
           );
 
           // Find title matches
           const titleMatch = result.matches.find(
             (match) =>
-              match.field.toLowerCase().includes('title') &&
-              !match.field.toLowerCase().includes('code')
+              match.field.toLowerCase().includes("title") &&
+              !match.field.toLowerCase().includes("code")
           );
 
           return {
@@ -158,7 +159,7 @@ const Search = () => {
     ].slice(0, 5);
 
     setRecentSearches(updatedRecent);
-    localStorage.setItem('recentSearches', JSON.stringify(updatedRecent));
+    localStorage.setItem("recentSearches", JSON.stringify(updatedRecent));
   };
 
   const handleSearch = (e) => {
@@ -171,18 +172,18 @@ const Search = () => {
 
   const handleCodeClick = (e, value, type) => {
     e.stopPropagation();
-    if (type === 'SOC Code') {
-      type = 'soc';
-    } else if (type === 'CIP Code') {
-      type = 'cip';
+    if (type === "SOC Code") {
+      type = "soc";
+    } else if (type === "CIP Code") {
+      type = "cip";
     }
     navigate(`/job/${type}/${value}`);
   };
 
   const clearSearch = () => {
-    setQuery('');
+    setQuery("");
     setResults([]);
-    setError('');
+    setError("");
     searchInputRef.current?.focus();
   };
 
@@ -192,7 +193,7 @@ const Search = () => {
   };
 
   const getResultLink = (result) => {
-    return `/details/${result.file.replace('.json', '')}`;
+    return `/details/${result.file.replace(".json", "")}`;
   };
 
   const toggleSettings = () => {
@@ -207,13 +208,13 @@ const Search = () => {
   };
 
   const formatFieldName = (field) => {
-    const parts = field.split('.');
+    const parts = field.split(".");
     let lastPart = parts[parts.length - 1];
 
-    if (lastPart === 'SOC Code') return 'SOC';
-    if (lastPart === 'CIP Code') return 'CIP';
-    if (lastPart === 'SOC Title') return 'SOC Title';
-    if (lastPart === 'CIP Title') return 'CIP Title';
+    if (lastPart === "SOC Code") return "SOC";
+    if (lastPart === "CIP Code") return "CIP";
+    if (lastPart === "SOC Title") return "SOC Title";
+    if (lastPart === "CIP Title") return "CIP Title";
 
     return lastPart;
   };
@@ -261,8 +262,8 @@ const Search = () => {
             aria-label="Search by SOC/CIP code or title"
             className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
               error
-                ? 'border-red-500 focus:ring-red-200'
-                : 'border-gray-300 focus:ring-blue-200'
+                ? "border-red-500 focus:ring-red-200"
+                : "border-gray-300 focus:ring-blue-200"
             }`}
           />
           {query && (
@@ -280,8 +281,8 @@ const Search = () => {
             disabled={isLoading || !query.trim()}
             className={`ml-2 px-4 py-2 rounded-lg ${
               isLoading || !query.trim()
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                ? "bg-gray-300 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}
           >
             Search
@@ -311,7 +312,7 @@ const Search = () => {
                   type="checkbox"
                   checked={searchSettings.caseSensitive}
                   onChange={(e) =>
-                    handleSettingChange('caseSensitive', e.target.checked)
+                    handleSettingChange("caseSensitive", e.target.checked)
                   }
                   className="rounded text-blue-600"
                 />
@@ -320,13 +321,18 @@ const Search = () => {
             </div>
 
             <div>
+              <p>
+                If there are none please press the update button in the header
+                then refresh the page!
+              </p>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Search in specific array (wda_hpo_lists.json only)
               </label>
+
               <select
                 value={searchSettings.targetArray}
                 onChange={(e) =>
-                  handleSettingChange('targetArray', e.target.value)
+                  handleSettingChange("targetArray", e.target.value)
                 }
                 className="w-full p-2 border border-gray-300 rounded-md"
               >
@@ -378,7 +384,7 @@ const Search = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-medium text-gray-900 group-hover:text-blue-600">
-                    {result.file.replace('.json', '')}
+                    {result.file.replace(".json", "")}
                   </h3>
 
                   {/* Display title if available */}
@@ -404,7 +410,7 @@ const Search = () => {
 
               <div className="mt-2 flex flex-wrap gap-1">
                 {result.matches.map((match) => {
-                  const isSoc = match.field.toLowerCase().includes('soc');
+                  const isSoc = match.field.toLowerCase().includes("soc");
                   const fieldName = formatFieldName(match.field);
 
                   return (
@@ -413,8 +419,8 @@ const Search = () => {
                       onClick={(e) => handleCodeClick(e, match.id, match.type)}
                       className={`px-2 py-1 text-xs rounded cursor-pointer ${
                         isSoc
-                          ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-                          : 'bg-green-100 text-green-800 hover:bg-green-200'
+                          ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                          : "bg-green-100 text-green-800 hover:bg-green-200"
                       }`}
                     >
                       {fieldName}: {match.value} ({match.id})
