@@ -10,7 +10,8 @@
     "concurrently": "^9.1.2"
   },
   "scripts": {
-    "dev": "concurrently \"pnpm run server\" \"pnpm run client\"",
+    "start": "concurrently \"pnpm run server\" \"pnpm run client\"",
+    "dev:docker": "docker compose down && docker compose up --build",
     "server": "cd backend && pnpm dev",
     "client": "cd frontend && pnpm dev"
   }

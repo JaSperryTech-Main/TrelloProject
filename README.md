@@ -56,3 +56,18 @@ GET http://localhost:3000/api/update
 
 - Frontend runs on port 80 (not 5173) in Dockerized environments.
 - Setup/build may take a few minutes on first run.
+
+## AWS Codes (NO Luck)
+
+- Compress-Archive -Path .\* -DestinationPath app.zip
+- aws elasticbeanstalk create-application-version --application-name cipSoc --version-label v3 --source-bundle S3Bucket="cipsoc-deployments",S3Key="app.zip"
+- aws elasticbeanstalk describe-environments --application-name cipSoc --environment-names cipSoc-env-v4
+- aws elasticbeanstalk create-environment --application-name cipSoc --environment-name cipSoc-env-v4 --solution-stack-name "64bit Amazon Linux 2023 v6.5.2 running Node.js 22" --version-label v5
+- aws elasticbeanstalk update-environment --environment-name cipSoc-env-v4 --version-label v5
+
+## On Render
+
+- Create a web Service
+- change to deployment branch
+- Leave as docker
+- Add PORT and VITE_BACKEND_URL as Environment Variables
