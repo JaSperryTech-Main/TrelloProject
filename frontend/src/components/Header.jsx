@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router';
+import { useState } from "react";
+import { Link } from "react-router";
 
 const Header = () => {
   const [isUpdating, setIsUpdating] = useState(false);
@@ -13,7 +13,7 @@ const Header = () => {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/update`,
         {
-          method: 'GET',
+          method: "GET",
         }
       );
 
@@ -22,10 +22,10 @@ const Header = () => {
       }
 
       const data = await response.json();
-      console.log('Update successful:', data);
+      console.log("Update successful:", data);
     } catch (error) {
-      console.error('Update error:', error);
-      setUpdateError(error.message || 'Failed to update. Please try again.');
+      console.error("Update error:", error);
+      setUpdateError(error.message || "Failed to update. Please try again.");
     } finally {
       setIsUpdating(false);
     }
@@ -34,11 +34,13 @@ const Header = () => {
   return (
     <header className="flex items-center gap-6 p-4 bg-white shadow-sm relative md:p-8 md:gap-6 flex-wrap">
       {/* Logo */}
-      <img
-        src="/path/to/logo.png"
-        alt="Site Logo"
-        className="h-10 w-auto flex-shrink-0 md:h-10"
-      />
+      <Link to="/">
+        <img
+          src="/logo.png"
+          alt="Site Logo"
+          className="h-16 w-16 rounded-full object-cover scale-125"
+        />
+      </Link>
 
       {/* Update Button */}
       <div className="relative flex flex-col items-end">
@@ -48,13 +50,13 @@ const Header = () => {
           className={`px-6 py-3 rounded-md font-medium whitespace-nowrap transition-colors
             ${
               isUpdating
-                ? 'bg-blue-300 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                ? "bg-blue-300 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
             }
           `}
           aria-busy={isUpdating}
         >
-          {isUpdating ? 'Updating...' : 'Update'}
+          {isUpdating ? "Updating..." : "Update"}
         </button>
         {updateError && (
           <div className="text-red-600 text-sm mt-1 text-right">
